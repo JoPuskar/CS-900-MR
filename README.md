@@ -1,2 +1,3 @@
-# CS-900-MR
-Movie recommender
+# cs9000
+
+A Movie Recommender
