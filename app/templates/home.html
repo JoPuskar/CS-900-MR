@@ -1,28 +1,21 @@
 {% extends "base.html" %}
 {% block content %}
-    <!-- <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/fontawesome-stars-o.css') }}">
-    <script src="static/js/jquery-1.11.2.min.js"></script>
-    <script src="static/js/jquery.barrating.min.js"></script>
-    <script src="static/js/example.js"></script> -->
-   
 
 	<ul class="list-group list-inline">
   
 	{% for movie in movies %}
-    <!-- <div id="gridDiv" style="display: block;"> -->
 		<li class="list-group-item">
-      <div class="rw-ui-container"></div>
-        <div class="col col-fullwidth">
-          {{ movie.name.capitalize() }}
+      			<div class="rw-ui-container"></div>
+        			<div class="col col-fullwidth">
+          			{{ movie.name.capitalize() }}
 
-        </div>
-
-			<img src="static/images/{{ movie.name }}.jpg"/>
-
+       			</div>
+				<img src="static/images/{{ movie.name }}.jpg"/>
 		</li>
-		<!-- </div> -->
 	{% endfor %}
+		
 	</ul>
+
 <script type="text/javascript">(function(d, t, e, m){
     
     // Async Rating-Widget initialization.
@@ -52,6 +45,7 @@
         });
         RW.render();
     };
+		
         // Append Rating-Widget JavaScript library.
     var rw, s = d.getElementsByTagName(e)[0], id = "rw-js",
         l = d.location, ck = "Y" + t.getFullYear() + 
@@ -64,4 +58,5 @@
     rw.src = p + "//" + a + "external" + f + ".js?ck=" + ck;
     s.parentNode.insertBefore(rw, s);
     }(document, new Date(), "script", "rating-widget.com/"));</script>
+
 {% endblock %}
