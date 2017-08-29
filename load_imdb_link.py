@@ -2,19 +2,16 @@ from app import db
 from app.models import *
 import pandas as pd
 
-df = pd.read_csv('movie_data.csv', sep=',')
+df = pd.read_csv('links.csv', sep=',')
 
-db.drop_all()
-db.create_all()
-
-def normalize(val):
-	return (val - 0.5) * 2
-
+count = 0
 for d in df.values:
-	name, comedy, action, romance, scifi = d[0], d[1], d[2], d[3], d[4]
-	comedy, action, romance, scifi = normalize(comedy), normalize(action), normalize(romance), normalize(scifi)
-	movie = Movie(name, comedy, action, romance, scifi)
+	count = count + 1
+	movie_id,imdb_id, tmdb_id = d[0], d[1], d[2]
+	movie = Movie.query.filter_by(movie_id = movie_id).first()
+	movie.imdb_id = imdb_id
 	db.session.add(movie)
+	print('Count: ' + str(count))
 	
 # # p = User('puskar', 'puskar')
 # # k = User('kunjung', 'kunjung')
