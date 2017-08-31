@@ -24,7 +24,7 @@ NUM_OF_MOVIES_TO_RECOMMEND = 10
 IMDB_URL_STRING = 'http://www.imdb.com/title/tt'
 MAX_SEARCH_RESULTS = 5
 
-df = pd.read_csv('movie_data.csv', sep=',' nrows=12)
+df = pd.read_csv('movie_data.csv', sep=',', nrows=12)
 
 @login_manager.user_loader
 def load_user(user_id):
