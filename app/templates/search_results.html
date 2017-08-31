@@ -1,0 +1,21 @@
+<!-- {% extends "base.html" %}
+
+{% block content %}
+  <h1>Search results for "{{ query }}":</h1>
+  {% for movie in results %}
+      <li class="list-group-item">
+			<h3 style="text-align:center; color:blue">{{ movie[0].name.capitalize() }}</h3>
+			<h4>Predicted Rating: {{ movie[1] }}</h4>
+			<img src="{{ movie[2] }}">
+			
+			<a href="{{ 'http://www.imdb.com/title/tt' + movie[0].imdb_id|string() }}">
+				Imdb Page
+			</a>
+			-->
+		<!-- 	<p>{{ movie[3] }}</p>
+			<a href="{{ url_for('rate', movie_id=movie[0].id) }}">
+				Rate this movie
+			</a>
+		</li>
+  {% endfor %}
+{% endblock %} --> 

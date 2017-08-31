@@ -1,5 +1,8 @@
-from app import db
+from app import app, db
 from flask_login import UserMixin
+# import flask_sqlalchemy 
+# from flask_whooshalchemy import whoosh_index
+
 
 ratings = db.Table('ratings',
 		db.Column('user_id', db.Integer, db.ForeignKey('users.id')),
@@ -45,6 +48,7 @@ class User(UserMixin, db.Model):
 
 class Movie(db.Model):
 	__tablename__ = 'movies'
+	# __searchable__ = 'name'
 	id = db.Column(db.Integer, primary_key=True)
 	movie_id = db.Column(db.Integer, unique=True)
 	name = db.Column(db.String(42))
@@ -70,6 +74,8 @@ class Movie(db.Model):
 		return {
 			'name': self.name
 		}
+
+# whoosh_index(app, Movie)
 	
 # use this to update or get data from ratings table
 ######################

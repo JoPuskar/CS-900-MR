@@ -12,6 +12,8 @@
 				<p> Scifi: {{ preference.scifi * 5 }} </p>
 			{% endif %}
 		</div>
+		<!-- 
+		<h1> Welcome to MovieRecommender {{ username }} ! </h1> -->
 
 		<form class="form-signin" method="POST" action="{{url_for('setpreferences')}}">
 			<h2 class="form-signin-heading">Enter preference values from -5 to 5</h2>
@@ -25,6 +27,5 @@
 		</form>
 	</div>
 </div>
-
 
 {% endblock %}

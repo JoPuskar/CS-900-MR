@@ -1,7 +1,7 @@
-from flask import render_template, redirect, url_for, request, session, jsonify, make_response
+from flask import render_template, redirect, url_for, request, session, jsonify, make_response, flash
 
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, IntegerField, FloatField
+from wtforms import StringField, PasswordField, BooleanField, IntegerField, FloatField, SubmitField
 from wtforms.validators import InputRequired, Email, Length, NumberRange
 from flask_login import login_user, logout_user, login_required, current_user
 
@@ -18,9 +18,10 @@ from bs4 import BeautifulSoup
 COUNTER = 0
 
 NO_OF_RATINGS_TO_TRIGGER_ALGORITHM = 2
-NUM_OF_MOVIES_TO_USE = 1000
+NUM_OF_MOVIES_TO_USE = 10
 NUM_OF_MOVIES_TO_RECOMMEND = 10
 IMDB_URL_STRING = 'http://www.imdb.com/title/tt'
+MAX_SEARCH_RESULTS = 5
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -43,6 +44,11 @@ class PreferenceForm(FlaskForm):
 	romance = FloatField('Romance', validators=[InputRequired(), NumberRange(min=-5, max=5)])
 	scifi = FloatField('Scifi', validators=[InputRequired(), NumberRange(min=-5, max=5)])
 
+class SearchForm(FlaskForm):
+	search = StringField('search', validators=[InputRequired()])
+	submit = SubmitField('Search', render_kw={'class': 'btn btn-success btn-block'})
+
+
 class RatingForm(FlaskForm):
 	rating = IntegerField('Rating', validators=[InputRequired()])
 
@@ -57,7 +63,9 @@ def get_poster_and_description(imdb_id):
 	description = soup.find(itemprop="description").text
 	return image_link.get("src"), description
 
+
 @app.route('/')
+@login_required
 def home():
 	movies = Movie.query.limit(NUM_OF_MOVIES_TO_RECOMMEND)
 	### Get the images link
@@ -89,6 +97,10 @@ def signup():
 	form = RegisterForm()
 
 	if form.validate_on_submit():
+		user = User.query.filter_by(username=form.username.data).first()
+		if form.username.data == user: 
+			flash('The username is already taken! Please Make another choice.')
+			return redirect(url_for('signup'))
 		new_user = User(form.username.data, form.password.data)
 		comedy = random_preference()
 		action = random_preference()
@@ -99,6 +111,7 @@ def signup():
 		db.session.add(prefer)
 		db.session.commit()
 		login_user(new_user, remember=True)
+		flash('Thanks for registering')
 		return redirect(url_for('setpreferences'))
 
 	return render_template('signup.html', form=form)
@@ -106,6 +119,11 @@ def signup():
 @app.route('/secret')	
 def secret():
 	return render_template('secret.html')
+
+
+@app.route('/about')	
+def about():
+	return render_template('about.html')
 	
 @app.route('/setpreferences', methods=['POST', 'GET'])
 @login_required
@@ -183,6 +201,20 @@ def rate(movie_id):
 
 	movie = Movie.query.get(movie_id)
 	return render_template('rate.html', movie=movie, form=form)
+
+# @app.route('/search', methods=['GET', 'POST'])
+# @login_required
+# def search():
+#   form = SearchForm(request.form)
+#   if request.method == 'POST' and form.validate_on_submit():
+#   		return redirect((url_for('search_results', query=form.search.data, form=form)))
+
+
+# @app.route('/search_results/<query>')
+# @login_required
+# def search_results(query, form):
+#   results = Movie.query.whoosh_search(query, MAX_SEARCH_RESULTS).all()
+#   return render_template('search_results.html', query=query, results=results)
 
 
 @app.route('/logout')

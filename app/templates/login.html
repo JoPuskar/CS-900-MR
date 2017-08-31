@@ -1,19 +1,179 @@
-{% extends "base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
-{% block content %}
-<div class="row">
-	<div class="col-xs-4 center-block small">
-		<form class="form-signin" method="POST" action="{{url_for('login')}}">
-			<h2 class="form-signin-heading">Login</h2>
-			{{ form.hidden_tag() }}
-			{{ wtf.form_field(form.username) }}
-			{{ wtf.form_field(form.password) }}
-			{{ wtf.form_field(form.remember) }}
+<!DOCTYPE html>
+<html>
+	<!-- <link rel="stylesheet" type="text/css" href="static/css/login.css"> -->
+	<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}"> 
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>	
+<style>
+/* Full-width input fields */
+input[type=text], input[type=password] {
+    width: 80%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
 
-			<button class="btn btn-lg btn-primary btn-block" type="submit">Login</button>
-		</form>
-	</div>
-</div>
+/* Set a style for all buttons */
+button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+}
 
+button:hover {
+    opacity: 0.8;
+}
 
-{% endblock %}
+/* Extra styles for the cancel button */
+.cancelbtn {
+    width: auto;
+    padding: 10px 18px;
+    background-color: #f44336;
+}
+
+/* Center the image and position the close button */
+.imgcontainer {
+    text-align: center;
+    margin: 34px 0 22px 0;
+    position: relative;
+}
+
+img.avatar {
+    width: 10%;
+    border-radius: 50%;
+}
+
+.container {
+    padding: 16px;
+}
+
+span.psw {
+    float: right;
+    padding-top: 16px;
+}
+
+/* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    padding-top: 60px;
+}
+
+/* Modal Content/Box */
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto 15% auto; /* 5% from the top, 15% from the bottom and centered */
+    border: 1px solid #888;
+    width: 80%; /* Could be more or less, depending on screen size */
+}
+
+/* The Close Button (x) */
+.close {
+    position: absolute;
+    right: 25px;
+    top: 0;
+    color: #000;
+    font-size: 35px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: red;
+    cursor: pointer;
+}
+
+/* Add Zoom Animation */
+.animate {
+    -webkit-animation: animatezoom 0.6s;
+    animation: animatezoom 0.6s
+}
+
+@-webkit-keyframes animatezoom {
+    from {-webkit-transform: scale(0)} 
+    to {-webkit-transform: scale(1)}
+}
+    
+@keyframes animatezoom {
+    from {transform: scale(0)} 
+    to {transform: scale(1)}
+}
+
+/* Change styles for span and cancel button on extra small screens */
+@media screen and (max-width: 300px) {
+    span.psw {
+       display: block;
+       float: none;
+    }
+    .cancelbtn {
+       width: 100%;
+    }
+}
+</style>
+	<nav class="navbar navbar-inverse">
+	  <div class="container-fluid">
+		    <div class="navbar-header">
+			    <center>
+			      <a class="navbar-brand" href="{{ url_for('about') }}">Movie Recommender</a>
+				</center>
+			</div>
+		</div>
+	</nav>
+<body>
+	<center>
+		<h2>Proceed to Login Form</h2>
+
+		<button onclick="document.getElementById('id01').style.display='block'" style="width:auto;">Login</button>
+	</center>
+		<div id="id01" class="modal">
+		  
+		  <form class="modal-content animate" method="POST" action="{{ url_for('login') }}">
+		    <div class="imgcontainer">
+		      <span onclick="document.getElementById('id01').style.display='none'" class="close" title="Close Modal">&times;</span>
+		      <img src="static/images/img_avatar2.png" alt="Avatar" class="avatar">
+		    </div>
+
+		    <div class="container">
+					{{ form.hidden_tag() }}
+					{{ wtf.form_field(form.username) }}
+					{{ wtf.form_field(form.password) }}<!-- 
+      				<input type="checkbox" checked="checked"> Remember me<br/> -->
+					<!-- <button type="submit" style="width:40%;">Login</button> -->
+					<button class="btn btn-lg btn-primary btn-block" type="submit" style="width: 50%;">Login</button>
+    		</div>
+    		
+		    <div class="container" style="background-color:#f1f1f1; width:100%;">
+		      <button type="button" onclick="document.getElementById('id01').style.display='none'" class="cancelbtn">Cancel</button>
+		      <span class="psw">Not a member? Please <a href="#">Register</a></span>
+		    </div>
+		  </form>
+		</div>
+
+<script>
+	// Get the modal
+	var modal = document.getElementById('id01');
+
+	// When the user clicks anywhere outside of the modal, close it
+	window.onclick = function(event) {
+	    if (event.target == modal) {
+	        modal.style.display = "none";
+	    }
+	}
+</script>
+</body>
+</html>

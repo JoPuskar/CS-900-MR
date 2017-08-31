@@ -7,3 +7,8 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False
 SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'data.db')
 RECAPTCHA_PUBLIC_KEY = '6LfC6x4UAAAAAM_37yVtTCbWTvj2A-1RYO02l1Ay'
 RECAPTCHA_PRIVATE_KEY = '6LfC6x4UAAAAACIDnsKT32rAJkIuU7DD6B7EFPN9'
+
+import warnings
+from flask.exthook import ExtDeprecationWarning
+
+warnings.simplefilter('ignore', ExtDeprecationWarning)
