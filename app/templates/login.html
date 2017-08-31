@@ -175,5 +175,20 @@ span.psw {
 	    }
 	}
 </script>
+	<div class="container" style="background-color:#f1f1f1; width:100%;">
+		<ul class="list-group">
+		
+			{% for movie in movies %}
+				<figure>	
+					<div align="left" style="float: left; display: inline-block; margin: 0 5px;">		
+						<figcaption>{{ movie[0].capitalize() }}</figcaption>
+							<img src="static/images/{{ movie[0] }}.jpg" title="{{ movie[0].capitalize()}}" />
+					</div>
+				</figure>
+			{% endfor %}
+			
+		</ul>
+	</div>
+
 </body>
 </html>
