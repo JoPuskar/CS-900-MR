@@ -93,7 +93,11 @@ def login():
 			if user.password == form.password.data:
 				login_user(user, remember=form.remember.data)
 				return redirect(url_for('dashboard'))
-	
+			else:
+				flash("Incorrect credentials! Please try again.")
+		else:
+			flash("The user doesn't exist. Please Signup to register.")
+			
 	return render_template('login.html', form=form, movies=df.values)
 
 @app.route('/signup', methods=['GET', 'POST'])
