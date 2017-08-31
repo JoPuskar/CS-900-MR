@@ -7,4 +7,5 @@ Flask-Login
 Flask-WTF
 WTForms==2.1
 beautifulsoup4==4.5.1
+pandas (0.19.2)
 lxml
