@@ -7,6 +7,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 
 from app import app, db, login_manager
 from .models import *
+import pandas as pd
 
 ## Machine Learning 
 from .movie_ai import *
@@ -22,6 +23,8 @@ NUM_OF_MOVIES_TO_USE = 10
 NUM_OF_MOVIES_TO_RECOMMEND = 10
 IMDB_URL_STRING = 'http://www.imdb.com/title/tt'
 MAX_SEARCH_RESULTS = 5
+
+df = pd.read_csv('movie_data.csv', sep=',' nrows=12)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -90,7 +93,7 @@ def login():
 				login_user(user, remember=form.remember.data)
 				return redirect(url_for('dashboard'))
 	
-	return render_template('login.html', form=form)
+	return render_template('login.html', form=form, movies=df.values)
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -114,7 +117,7 @@ def signup():
 		flash('Thanks for registering')
 		return redirect(url_for('setpreferences'))
 
-	return render_template('signup.html', form=form)
+	return render_template('signup.html', form=form, movies=df.values)
 
 @app.route('/secret')	
 def secret():
