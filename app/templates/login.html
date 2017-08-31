@@ -156,10 +156,10 @@ span.psw {
 					<!-- <button type="submit" style="width:40%;">Login</button> -->
 					<button class="btn btn-lg btn-primary btn-block" type="submit" style="width: 50%;">Login</button>
     		</div>
-    		
+
 		    <div class="container" style="background-color:#f1f1f1; width:100%;">
 		      <button type="button" onclick="document.getElementById('id01').style.display='none'" class="cancelbtn">Cancel</button>
-		      <span class="psw">Not a member? Please <a href="#">Register</a></span>
+		      <span class="psw">Not a member? Please <a href="{{ url_for('signup') }}">Register</a></span>
 		    </div>
 		  </form>
 		</div>
