@@ -22,7 +22,7 @@ NO_OF_RATINGS_TO_TRIGGER_ALGORITHM = 2
 NUM_OF_MOVIES_TO_USE = 10
 NUM_OF_MOVIES_TO_RECOMMEND = 10
 IMDB_URL_STRING = 'http://www.imdb.com/title/tt'
-MAX_SEARCH_RESULTS = 5
+MAX_SEARCH_RESULTS = 5	
 
 df = pd.read_csv('movie_data.csv', sep=',', nrows=12)
 
@@ -80,6 +80,7 @@ def home():
 		movies_with_poster_images.append(movie_with_image)
 
 	return render_template('home.html', movies=movies_with_poster_images)
+
 
 
 @app.route('/login', methods=['GET', 'POST'])
