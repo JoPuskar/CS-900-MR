@@ -1,30 +1,34 @@
 from flask import render_template, redirect, url_for, request, session, jsonify, make_response, flash
 
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, IntegerField, FloatField, SubmitField
+from wtforms import StringField, PasswordField, BooleanField, IntegerField, FloatField
 from wtforms.validators import InputRequired, Email, Length, NumberRange
 from flask_login import login_user, logout_user, login_required, current_user
+from sqlalchemy import desc
 
 from app import app, db, login_manager
 from .models import *
 import pandas as pd
 
+
 ## Machine Learning 
 from .movie_ai import *
 import heapq
 import random
-from urllib import request
+from urllib import request as req
 from bs4 import BeautifulSoup
 
 COUNTER = 0
-
-NO_OF_RATINGS_TO_TRIGGER_ALGORITHM = 2
-NUM_OF_MOVIES_TO_USE = 10
-NUM_OF_MOVIES_TO_RECOMMEND = 10
-IMDB_URL_STRING = 'http://www.imdb.com/title/tt'
-MAX_SEARCH_RESULTS = 5	
-
 df = pd.read_csv('movie_data.csv', sep=',', nrows=12)
+NO_OF_RATINGS_TO_TRIGGER_ALGORITHM = 2
+NUM_OF_MOVIES_TO_USE = 1000
+NUM_OF_MOVIES_TO_RECOMMEND = 3
+IMDB_URL_STRING = 'http://www.imdb.com/title/tt'
+
+####################
+######## Add an algorithm to update the movie features as well but with small learning rate
+######## Maybe add a threshold that only after 5 or 10 users have rated it, do you update that movie's features
+####################
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -47,11 +51,6 @@ class PreferenceForm(FlaskForm):
 	romance = FloatField('Romance', validators=[InputRequired(), NumberRange(min=-5, max=5)])
 	scifi = FloatField('Scifi', validators=[InputRequired(), NumberRange(min=-5, max=5)])
 
-class SearchForm(FlaskForm):
-	search = StringField('search', validators=[InputRequired()])
-	submit = SubmitField('Search', render_kw={'class': 'btn btn-success btn-block'})
-
-
 class RatingForm(FlaskForm):
 	rating = IntegerField('Rating', validators=[InputRequired()])
 
@@ -61,25 +60,51 @@ def random_preference():
 
 def get_poster_and_description(imdb_id):
 	url = IMDB_URL_STRING + str(imdb_id)
-	soup = BeautifulSoup(request.urlopen(url).read(), "lxml")
+	soup = BeautifulSoup(req.urlopen(url).read(), "lxml")
 	image_link = soup.find(itemprop="image")
 	description = soup.find(itemprop="description").text
 	return image_link.get("src"), description
 
+def get_avg_predicted_rating(user, movies):
+	avg_predicted_rating = 0
+	count = 0
+	for movie in movies:
+		count = count + 1
+		predicted_rating = calculate_predicted_rating(user, movie[0])
+		avg_predicted_rating += predicted_rating
+
+	avg_predicted_rating = avg_predicted_rating / count
+	return avg_predicted_rating
+
+@app.route('/graph')
+@login_required
+def graph():
+	avg_rating_string = ""
+	movie_numbers = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
+	for number in movie_numbers:
+		movies = []
+		for movie in Movie.query.limit(number):
+			predicted_rating = calculate_predicted_rating(current_user, movie)
+			mr = (movie, predicted_rating)
+			movies.append(mr)
+
+		movies = heapq.nlargest(NUM_OF_MOVIES_TO_RECOMMEND, movies, lambda mr: mr[1])
+		avg_rating = get_avg_predicted_rating(current_user, movies)
+		avg_rating_string += str(avg_rating) + ", "
+	return avg_rating_string
+
+
+@app.route('/about')
+def about():
+	return render_template('about.html')
 
 @app.route('/')
-@login_required
-def home():
-	movies = Movie.query.limit(NUM_OF_MOVIES_TO_RECOMMEND)
-	### Get the images link
-	movies_with_poster_images = []
-	for movie in movies:
-		imdb_id = movie.imdb_id
-		image_link, description = get_poster_and_description(imdb_id)
-		movie_with_image = (movie, image_link, description)
-		movies_with_poster_images.append(movie_with_image)
+def everyone():
+	return render_template('home.html', movies=df.values)
 
-	return render_template('home.html', movies=movies_with_poster_images)
+@app.route('/home')
+def home():
+	return render_template('home.html', movies=df.values)
 
 
 
@@ -106,7 +131,7 @@ def signup():
 
 	if form.validate_on_submit():
 		user = User.query.filter_by(username=form.username.data).first()
-		if form.username.data == user: 
+		if user: 
 			flash('The username is already taken! Please Make another choice.')
 			return redirect(url_for('signup'))
 		new_user = User(form.username.data, form.password.data)
@@ -124,14 +149,10 @@ def signup():
 
 	return render_template('signup.html', form=form, movies=df.values)
 
+
 @app.route('/secret')	
 def secret():
 	return render_template('secret.html')
-
-
-@app.route('/about')	
-def about():
-	return render_template('about.html')
 	
 @app.route('/setpreferences', methods=['POST', 'GET'])
 @login_required
@@ -162,12 +183,14 @@ def setpreferences():
 	return render_template('setpreferences.html', preference = preference, form=form)
 
 
+
+
 @app.route('/dashboard')
 @login_required
 def dashboard():
 	### Get the BEST 10 predicted rated movies
 	movies = []
-	for movie in Movie.query.limit(NUM_OF_MOVIES_TO_USE):
+	for movie in Movie.query.order_by(desc(Movie.id)).limit(NUM_OF_MOVIES_TO_USE):
 		predicted_rating = calculate_predicted_rating(current_user, movie)
 		mr = (movie, predicted_rating)
 		movies.append(mr)
@@ -210,20 +233,6 @@ def rate(movie_id):
 	movie = Movie.query.get(movie_id)
 	return render_template('rate.html', movie=movie, form=form)
 
-# @app.route('/search', methods=['GET', 'POST'])
-# @login_required
-# def search():
-#   form = SearchForm(request.form)
-#   if request.method == 'POST' and form.validate_on_submit():
-#   		return redirect((url_for('search_results', query=form.search.data, form=form)))
-
-
-# @app.route('/search_results/<query>')
-# @login_required
-# def search_results(query, form):
-#   results = Movie.query.whoosh_search(query, MAX_SEARCH_RESULTS).all()
-#   return render_template('search_results.html', query=query, results=results)
-
 
 @app.route('/logout')
 @login_required
@@ -235,38 +244,38 @@ def logout():
 ### JSON API STUFF #####
 #########################
 
-# movies = [
-#     {
-#         'name': 'All esper dayo',
-#     },
-#     {
-#         'name': 'Dr Strange'
-#     },
-#     {
-#         'name': 'Hell Boy'
-#     },
-#     {
-#         'name': 'Hell Boy'
-#     },
-#     {
-#         'name': 'Hell Boy'
-#     },
-#     {
-#         'name': 'Hell Boy'
-#     },
-#     {
-#         'name': 'Hell Boy'
-#     },
-#     {
-#         'name': 'Hell Boy'
-#     },
-#     {
-#         'name': 'Hell Boy'
-#     },
-#     {
-#         'name': 'Hell Boy'
-#     }
-# ]
+movies = [
+    {
+        'name': 'All esper dayo',
+    },
+    {
+        'name': 'Dr Strange'
+    },
+    {
+        'name': 'Hell Boy'
+    },
+    {
+        'name': 'Hell Boy'
+    },
+    {
+        'name': 'Hell Boy'
+    },
+    {
+        'name': 'Hell Boy'
+    },
+    {
+        'name': 'Hell Boy'
+    },
+    {
+        'name': 'Hell Boy'
+    },
+    {
+        'name': 'Hell Boy'
+    },
+    {
+        'name': 'Hell Boy'
+    }
+]
 
 @app.route('/api/dashboard', methods=['GET'])
 def get_movies():
@@ -275,7 +284,7 @@ def get_movies():
 	return jsonify({'movies': movies})
 
 
-@app.route('/api/signup', methods=['POST'])
+@app.route('/api/signup', methods=['GET'])
 def mobile_signup():
 	username = request.args.get('username')
 	password = request.args.get('password')
@@ -319,8 +328,23 @@ def mobile_login():
 
 
 
-@app.route('/api/rate/<int:movie_id>', methods=['GET', 'POST'])
-def mobile_rate(movie_id):
+@app.route('/api/movie/<int:movie_id>', methods=['GET', 'POST'])
+def mobile_movie(movie_id):
 	
 	movie = Movie.query.get(movie_id)
+	if not movie:
+		return jsonify({'error': 'Not here'}), 400
 	return jsonify({'movie': movie.serialize}), 200
+
+
+
+@app.route('/api/rate')
+def mobile_rate():
+	movie_id = request.args.get('movie_id')
+	user_id = request.args.get('user_id')
+	rating = request.args.get('rating')
+
+	query = ratings.insert().values(user_id=user_id, movie_id=movie_id, rating=rating)
+	db.session.execute(query)
+	db.session.commit()
+	return jsonify({'done': 'complete'}), 201
